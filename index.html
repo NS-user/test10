@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevViz — 動かして学ぶ開発用語</title>
+  <meta name="description" content="React・Node.js・非同期処理・HTTP・DOM・Git など、開発の用語を実例とアニメーションで動かしながら学べるサイト。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へスキップ</a>
+
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle" aria-label="メニューを開く" aria-expanded="false">☰</button>
+    <div class="brand">
+      <span class="brand-mark">&lt;/&gt;</span>
+      <span class="brand-name">DevViz</span>
+      <span class="brand-tag">動かして学ぶ開発用語</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar" aria-label="用語一覧">
+      <div class="search-wrap">
+        <input type="search" id="search" placeholder="用語を検索…" aria-label="用語を検索" />
+      </div>
+      <ul class="nav-list" id="navList"></ul>
+      <div class="sidebar-footer">
+        <span id="progressText">学習: 0 / 0</span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </nav>
+
+    <main class="content" id="main">
+      <section class="hero" id="hero">
+        <h1>動かして学ぶ、開発の用語。</h1>
+        <p class="hero-lead">
+          React、Node.js、非同期処理、HTTP、DOM、Git…。
+          文字の説明だけでは掴みにくい概念を、<strong>実例</strong>と<strong>アニメーション</strong>で「動き」として理解しましょう。
+        </p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" id="startBtn">学習を始める →</button>
+          <span class="hero-hint">左のメニューから用語を選んでもOK</span>
+        </div>
+        <div class="hero-grid" id="heroGrid"></div>
+      </section>
+
+      <article class="concept" id="concept" hidden></article>
+    </main>
+  </div>
+
+  <footer class="sitefooter">
+    <span>DevViz — 開発用語を動かして学ぶ学習サイト</span>
+  </footer>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <script src="assets/js/concepts.js"></script>
+  <script src="assets/js/demos.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
