@@ -276,4 +276,160 @@ http.<span class="fn">createServer</span>((req, res) =&gt; {
     `,
     demo: "mountVariablesDemo",
   },
+
+  {
+    id: "arr",
+    icon: "💰",
+    title: "ARR / MRR",
+    group: "スタートアップ / SaaS指標",
+    summary: "サブスクで毎年（毎月）くりかえし入る売上。ARR = 年間経常収益、MRR = 月間経常収益。",
+    tags: ["SaaS", "売上", "サブスク"],
+    body: `
+      <p><strong>ARR</strong>（Annual Recurring Revenue＝年間経常収益）は、
+      サブスクで<strong>毎年くりかえし入ってくる売上</strong>を1年分で表した指標です。
+      月版が<strong>MRR</strong>（Monthly Recurring Revenue）。関係はシンプルで：</p>
+
+      <pre class="code">ARR = MRR × <span class="num">12</span>
+MRR = 1社あたり月額 × 顧客数</pre>
+
+      <p>ポイントは <strong>Recurring（くりかえし）</strong>。初期費用やコンサル料など
+      「1回きりの売上」は<strong>含めません</strong>。来年も自動で入ってくる安定収益だけを数えます。</p>
+
+      <div class="callout tip">
+        <div class="callout-title">なぜ重視される？</div>
+        <p>くりかえし入るので<strong>将来の売上が読める</strong>。だから投資家やスタートアップが
+        事業規模を語るときの共通言語になっています。「ARR 1億円」は日本では
+        “事業として立ち上がってきた” 節目とされます。</p>
+      </div>
+
+      <p>下の計算機で、月額と顧客数を動かすと MRR / ARR がリアルタイムに変わります。
+      「単価が高いほど少ない顧客数で同じARRに届く」ことを体感してみてください。</p>
+    `,
+    demo: "mountArrDemo",
+  },
+
+  {
+    id: "churn",
+    icon: "📉",
+    title: "チャーン（解約率）",
+    group: "スタートアップ / SaaS指標",
+    summary: "毎月どれだけ顧客が離れるか。サブスクの天敵で、低く抑えるほど売上が積み上がる。",
+    tags: ["SaaS", "解約", "継続率"],
+    body: `
+      <p><strong>チャーン（Churn）</strong>は<strong>解約率</strong>のこと。
+      「毎月、顧客（または売上）の何％が離れていくか」を表します。
+      サブスク事業は “穴の空いたバケツに水を入れ続ける” 構図なので、
+      この穴＝チャーンが大きいと、いくら新規を獲っても積み上がりません。</p>
+
+      <pre class="code"><span class="com">// 月次チャーン率</span>
+チャーン率 = その月の解約数 ÷ 月初の顧客数
+
+<span class="com">// 平均継続月数のざっくり目安</span>
+継続月数 ≈ <span class="num">1</span> ÷ 月次チャーン率</pre>
+
+      <p>たとえば月次チャーンが <code class="inline">5%</code> なら平均継続は約20ヶ月、
+      <code class="inline">2%</code> なら約50ヶ月。<strong>数％の差が継続年数を大きく変えます</strong>。</p>
+
+      <p>下のデモでチャーン率を動かすと、最初の顧客が
+      何ヶ月でどれだけ減るかをグラフで確認できます。
+      「半分になるまで何ヶ月か」も表示されます。</p>
+    `,
+    demo: "mountChurnDemo",
+  },
+
+  {
+    id: "ltv-cac",
+    icon: "⚖️",
+    title: "LTV / CAC",
+    group: "スタートアップ / SaaS指標",
+    summary: "顧客が生涯で払う額(LTV)と、1人獲得にかかる費用(CAC)の比。3以上なら健全とされる。",
+    tags: ["SaaS", "ユニットエコノミクス", "採算"],
+    body: `
+      <p>事業が儲かる構造か（＝ユニットエコノミクスが成立するか）を見る2大指標です。</p>
+      <ul>
+        <li><strong>LTV</strong>（Life Time Value＝顧客生涯価値）：1人の顧客が
+        契約期間を通じて払ってくれる<strong>総額</strong></li>
+        <li><strong>CAC</strong>（Customer Acquisition Cost＝顧客獲得コスト）：
+        広告・営業など<strong>1人獲得するのにかかった費用</strong></li>
+      </ul>
+
+      <pre class="code">LTV = 月額 × 粗利率 × 平均継続月数
+比率 = LTV ÷ CAC</pre>
+
+      <div class="callout">
+        <div class="callout-title">目安となる「3:1」ルール</div>
+        <p><strong>LTV ÷ CAC ≥ 3</strong> なら健全とされます（獲得コストの3倍は回収できる）。
+        1を切ると、顧客を増やすほど赤字＝穴の空いたビジネスです。</p>
+      </div>
+
+      <p>下のデモで月額・継続月数・獲得コストを動かすと、LTV・CAC・その比率と
+      “健全/要改善” の判定がリアルタイムに出ます。</p>
+    `,
+    demo: "mountLtvCacDemo",
+  },
+
+  {
+    id: "pmf",
+    icon: "🎯",
+    title: "PMF",
+    group: "スタートアップ / SaaS指標",
+    summary: "Product Market Fit。プロダクトが市場に本当に求められている状態。スタートアップ最初の関門。",
+    tags: ["スタートアップ", "成長", "プロダクト"],
+    body: `
+      <p><strong>PMF</strong>（Product Market Fit）とは、
+      <strong>「作ったプロダクトが、市場に本当に求められている」状態</strong>のこと。
+      スタートアップが最初に超えるべき関門で、ここを越えると成長が一気に加速します。</p>
+
+      <h2>PMF達成の「サイン」</h2>
+      <p>明確な数式はなく、複数のサインで判断します。たとえば：</p>
+      <ul>
+        <li>解約が少なく、使い続けてくれる（チャーンが低い）</li>
+        <li>口コミ・紹介で勝手にユーザーが増える</li>
+        <li>「無くなったら困る」と言うユーザーが多い（目安：40%以上）</li>
+        <li>作る前から「欲しい」と需要に追われている</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">PMF前にやりがちな失敗</div>
+        <p>PMF前に広告で無理に顧客を増やすと、チャーンで抜けていき
+        お金だけ溶けます。まず「求められる状態」を作るのが先、という順番が大切。</p>
+      </div>
+
+      <p>下のデモで、各サインのスイッチを入れると
+      “PMF達成度メーター” が動きます。どのサインが効くか試してみてください。</p>
+    `,
+    demo: "mountPmfDemo",
+  },
+
+  {
+    id: "funding",
+    icon: "🚀",
+    title: "資金調達ラウンド",
+    group: "スタートアップ / SaaS指標",
+    summary: "シード→シリーズA→B→C…と、成長段階ごとに投資家からお金を集める仕組み。",
+    tags: ["資金調達", "VC", "投資"],
+    body: `
+      <p>スタートアップは赤字でも先に投資してもらい、急成長を狙います。
+      その資金集めを成長段階ごとに区切ったのが<strong>ラウンド</strong>です。
+      後のラウンドほど、実績（ARRや成長率）が問われ、金額も大きくなります。</p>
+
+      <h2>主なラウンド</h2>
+      <ul>
+        <li><strong>シード</strong>：アイデア〜試作段階。少額で検証する</li>
+        <li><strong>シリーズA</strong>：PMF達成が見えた頃。本格成長の資金</li>
+        <li><strong>シリーズB / C…</strong>：拡大・人員増・海外展開などへ</li>
+      </ul>
+
+      <div class="callout tip">
+        <div class="callout-title">出口（イグジット）</div>
+        <p>投資家は最終的に <strong>IPO（上場）</strong> や <strong>M&A（買収）</strong> で
+        株を現金化してリターンを得ます。これがスタートアップ投資のゴール。
+        評価額10億ドル超の未上場企業を<strong>ユニコーン</strong>と呼びます。</p>
+      </div>
+
+      <p>下のラダーで各ラウンドをクリックすると、その段階の
+      “だいたいの状態（ARR・調達額・やること）” が表示されます。</p>
+    `,
+    demo: "mountFundingDemo",
+  },
 ];

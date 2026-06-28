@@ -674,4 +674,263 @@
     evaluate();
     root.appendChild(panel);
   };
+
+  /* 数値フォーマット（円） */
+  function yen(n) {
+    return "¥" + Math.round(n).toLocaleString("ja-JP");
+  }
+  function rangeRow(label, min, max, value, step, onInput, fmt) {
+    const out = h("span", { class: "field-out" }, [fmt ? fmt(value) : String(value)]);
+    const input = h("input", {
+      type: "range", class: "demo-range", min, max, step, value,
+      style: "flex:1;min-width:120px;accent-color:var(--accent)",
+    });
+    input.addEventListener("input", () => {
+      const v = Number(input.value);
+      out.textContent = fmt ? fmt(v) : String(v);
+      onInput(v);
+    });
+    const row = h("div", { style: "display:flex;align-items:center;gap:12px;margin:10px 0" }, [
+      h("span", { style: "width:130px;font-size:.85rem;color:var(--text-dim)" }, [label]),
+      input, out,
+    ]);
+    return row;
+  }
+
+  /* ========================================================
+     ARR / MRR 計算機
+     ======================================================== */
+  window.mountArrDemo = function (root) {
+    const { panel, stage } = demoShell("ARR / MRR 計算機", "CALCULATOR");
+    const state = { price: 10000, customers: 100 };
+
+    const mrrOut = h("div", { class: "react-counter-display", style: "font-size:1.6rem" }, []);
+    const arrOut = h("div", { class: "react-counter-display", style: "color:var(--accent-3)" }, []);
+    const note = h("p", { class: "lead", style: "margin:6px 0 0;font-size:.85rem" }, []);
+
+    function recalc() {
+      const mrr = state.price * state.customers;
+      const arr = mrr * 12;
+      mrrOut.textContent = yen(mrr) + " / 月";
+      arrOut.textContent = yen(arr) + " / 年";
+      const toOku = (1e8 / (state.price * 12));
+      note.textContent =
+        `この単価なら、ARR 1億円に必要な顧客数 ≒ ${Math.ceil(toOku).toLocaleString("ja-JP")} 社`;
+    }
+
+    stage.appendChild(rangeRow("月額（1社）", 500, 500000, state.price, 500,
+      (v) => { state.price = v; recalc(); }, yen));
+    stage.appendChild(rangeRow("顧客数", 1, 2000, state.customers, 1,
+      (v) => { state.customers = v; recalc(); }, (v) => v.toLocaleString("ja-JP") + " 社"));
+    stage.appendChild(
+      h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px" }, [
+        h("div", { class: "react-state-box" }, [
+          h("div", { style: "font-size:.78rem;color:var(--text-dim);text-align:center" }, ["MRR（月間経常収益）"]), mrrOut,
+        ]),
+        h("div", { class: "react-state-box" }, [
+          h("div", { style: "font-size:.78rem;color:var(--text-dim);text-align:center" }, ["ARR（年間経常収益）"]), arrOut,
+        ]),
+      ])
+    );
+    stage.appendChild(note);
+    recalc();
+    root.appendChild(panel);
+  };
+
+  /* ========================================================
+     チャーン（解約率）— 顧客の減衰グラフ
+     ======================================================== */
+  window.mountChurnDemo = function (root) {
+    const { panel, stage } = demoShell("チャーンで顧客がどう減るか", "ANIMATION");
+    const state = { churn: 5, start: 1000 };
+    const MONTHS = 24;
+
+    const chart = h("div", {
+      style: "display:flex;align-items:flex-end;gap:3px;height:160px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:8px",
+    });
+    const summary = h("div", { class: "field-out", style: "margin-top:10px" }, []);
+
+    function recalc() {
+      chart.innerHTML = "";
+      const r = state.churn / 100;
+      let n = state.start;
+      let halfMonth = null;
+      for (let m = 0; m <= MONTHS; m++) {
+        const cur = state.start * Math.pow(1 - r, m);
+        if (halfMonth === null && cur <= state.start / 2) halfMonth = m;
+        const hPct = (cur / state.start) * 100;
+        const bar = h("div", {
+          style: `flex:1;height:${hPct}%;border-radius:3px 3px 0 0;` +
+            `background:linear-gradient(to top,var(--accent),var(--accent-2));` +
+            `min-height:2px;transition:height .3s`,
+          title: `${m}ヶ月後: ${Math.round(cur)}人`,
+        });
+        chart.appendChild(bar);
+      }
+      const end = Math.round(state.start * Math.pow(1 - r, MONTHS));
+      const avgMonths = r > 0 ? Math.round(1 / r) : Infinity;
+      summary.innerHTML =
+        `24ヶ月後: <b>${end.toLocaleString("ja-JP")}人</b>（残り ${Math.round(end / state.start * 100)}%）　／　` +
+        `半分になるまで: <b>${halfMonth !== null ? halfMonth + "ヶ月" : "—"}</b>　／　` +
+        `平均継続: <b>${avgMonths === Infinity ? "∞" : "約" + avgMonths + "ヶ月"}</b>`;
+    }
+
+    stage.appendChild(rangeRow("月次チャーン率", 0, 20, state.churn, 0.5,
+      (v) => { state.churn = v; recalc(); }, (v) => v + "%"));
+    stage.appendChild(rangeRow("開始時の顧客数", 100, 5000, state.start, 100,
+      (v) => { state.start = v; recalc(); }, (v) => v.toLocaleString("ja-JP") + "人"));
+    stage.appendChild(h("div", { style: "font-size:.78rem;color:var(--text-dim);margin-top:6px" }, ["新規獲得ゼロと仮定した場合の、24ヶ月の顧客数推移:"]));
+    stage.appendChild(chart);
+    stage.appendChild(summary);
+    recalc();
+    root.appendChild(panel);
+  };
+
+  /* ========================================================
+     LTV / CAC 採算チェッカー
+     ======================================================== */
+  window.mountLtvCacDemo = function (root) {
+    const { panel, stage } = demoShell("LTV / CAC 採算チェッカー", "CALCULATOR");
+    const state = { price: 10000, margin: 80, months: 24, cac: 50000 };
+
+    const verdict = h("div", { style: "text-align:center;padding:14px;border-radius:10px;margin-top:14px;font-weight:700" }, []);
+    const nums = h("div", { style: "display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px" }, []);
+
+    function recalc() {
+      const ltv = state.price * (state.margin / 100) * state.months;
+      const cac = state.cac;
+      const ratio = cac > 0 ? ltv / cac : Infinity;
+      nums.innerHTML = "";
+      const cells = [
+        ["LTV（生涯価値）", yen(ltv), "var(--accent)"],
+        ["CAC（獲得コスト）", yen(cac), "var(--warn)"],
+        ["LTV ÷ CAC", (ratio === Infinity ? "∞" : ratio.toFixed(1)), "var(--accent-3)"],
+      ];
+      cells.forEach(([label, val, color]) => {
+        nums.appendChild(h("div", { class: "react-state-box", style: "text-align:center" }, [
+          h("div", { style: "font-size:.74rem;color:var(--text-dim)" }, [label]),
+          h("div", { style: `font-size:1.2rem;font-weight:800;color:${color};margin-top:4px` }, [val]),
+        ]));
+      });
+      let msg, bg, fg;
+      if (ratio >= 3) { msg = "✅ 健全（3:1 をクリア）— 獲得コストを十分回収できています"; bg = "color-mix(in srgb,var(--accent-3) 18%,transparent)"; fg = "var(--accent-3)"; }
+      else if (ratio >= 1) { msg = "⚠️ 要改善（1〜3）— 回収はできるが、もう一伸ばし欲しい水準"; bg = "color-mix(in srgb,var(--warn) 18%,transparent)"; fg = "var(--warn)"; }
+      else { msg = "🚨 赤字構造（1未満）— 顧客を増やすほど損が膨らみます"; bg = "color-mix(in srgb,var(--danger) 18%,transparent)"; fg = "var(--danger)"; }
+      verdict.style.background = bg;
+      verdict.style.color = fg;
+      verdict.textContent = msg;
+    }
+
+    stage.appendChild(rangeRow("月額", 500, 200000, state.price, 500, (v) => { state.price = v; recalc(); }, yen));
+    stage.appendChild(rangeRow("粗利率", 10, 100, state.margin, 5, (v) => { state.margin = v; recalc(); }, (v) => v + "%"));
+    stage.appendChild(rangeRow("平均継続月数", 1, 60, state.months, 1, (v) => { state.months = v; recalc(); }, (v) => v + "ヶ月"));
+    stage.appendChild(rangeRow("CAC（獲得コスト）", 1000, 1000000, state.cac, 1000, (v) => { state.cac = v; recalc(); }, yen));
+    stage.appendChild(nums);
+    stage.appendChild(verdict);
+    recalc();
+    root.appendChild(panel);
+  };
+
+  /* ========================================================
+     PMF 達成度メーター
+     ======================================================== */
+  window.mountPmfDemo = function (root) {
+    const { panel, stage } = demoShell("PMF 達成度メーター", "INTERACTIVE");
+    const signals = [
+      { label: "解約が少なく使い続けられる", weight: 30 },
+      { label: "口コミ・紹介で勝手に増える", weight: 25 },
+      { label: "「無くなったら困る」が40%超", weight: 25 },
+      { label: "作る前から需要に追われている", weight: 20 },
+    ];
+    const checked = new Set();
+
+    const meterFill = h("div", {
+      style: "height:100%;width:0;border-radius:99px;transition:width .4s,background .4s;background:var(--danger)",
+    });
+    const meterLabel = h("div", { style: "text-align:center;font-weight:800;margin-top:8px" }, []);
+
+    function recalc() {
+      let score = 0;
+      signals.forEach((s, i) => { if (checked.has(i)) score += s.weight; });
+      meterFill.style.width = score + "%";
+      let color, text;
+      if (score >= 80) { color = "var(--accent-3)"; text = `🎉 PMF達成ライン（${score}%）— 成長を加速できる段階`; }
+      else if (score >= 50) { color = "var(--accent)"; text = `🌱 PMFが見えてきた（${score}%）— あと一歩`; }
+      else if (score >= 25) { color = "var(--warn)"; text = `🔍 模索中（${score}%）— サインを増やそう`; }
+      else { color = "var(--danger)"; text = `⛔ PMF前（${score}%）— まず“求められる状態”を作る`; }
+      meterFill.style.background = color;
+      meterLabel.textContent = text;
+      meterLabel.style.color = color;
+    }
+
+    stage.appendChild(h("p", { class: "lead", style: "margin-top:0" }, ["当てはまるサインをONにすると、達成度メーターが動きます:"]));
+    signals.forEach((s, i) => {
+      const box = h("button", {
+        class: "btn btn-sm",
+        style: "display:flex;width:100%;justify-content:space-between;align-items:center;margin:6px 0;text-align:left",
+      }, [
+        h("span", {}, [s.label]),
+        h("span", { class: "field-out" }, ["+" + s.weight + "%"]),
+      ]);
+      box.addEventListener("click", () => {
+        if (checked.has(i)) { checked.delete(i); box.classList.remove("btn-primary"); }
+        else { checked.add(i); box.classList.add("btn-primary"); }
+        recalc();
+      });
+      stage.appendChild(box);
+    });
+    stage.appendChild(h("div", {
+      style: "height:18px;background:var(--bg);border:1px solid var(--border);border-radius:99px;overflow:hidden;margin-top:14px",
+    }, [meterFill]));
+    stage.appendChild(meterLabel);
+    recalc();
+    root.appendChild(panel);
+  };
+
+  /* ========================================================
+     資金調達ラウンド ラダー
+     ======================================================== */
+  window.mountFundingDemo = function (root) {
+    const { panel, stage } = demoShell("資金調達ラウンドのはしご", "INTERACTIVE");
+    const rounds = [
+      { name: "シード", arr: "〜数千万円 / 未確定", raise: "数百万〜数千万円", todo: "アイデア検証・試作（MVP）を作る。少人数で素早く回す。" },
+      { name: "シリーズA", arr: "ARR 1億円前後", raise: "数億円", todo: "PMF達成が見えた段階。本格的な成長と組織づくりに投資。" },
+      { name: "シリーズB", arr: "ARR 数億〜10億円", raise: "十数億円", todo: "勝ち筋を拡大。営業・マーケを増強しシェアを取りにいく。" },
+      { name: "シリーズC+", arr: "ARR 数十億円〜", raise: "数十億円〜", todo: "海外展開・M&A・上場準備など、規模拡大のフェーズ。" },
+      { name: "イグジット", arr: "IPO / M&A", raise: "—", todo: "上場や買収で投資家がリターンを得るゴール。評価額10億ドル超はユニコーン。" },
+    ];
+
+    const detail = h("div", { class: "callout tip", style: "margin-top:14px" }, [
+      h("div", { class: "callout-title" }, ["クリックして各ラウンドを見る"]),
+      h("div", { style: "color:var(--text-dim)" }, ["上のはしごの段を選ぶと、その段階の状態が表示されます。"]),
+    ]);
+
+    const ladder = h("div", { style: "display:flex;flex-direction:column-reverse;gap:6px" });
+    rounds.forEach((r, i) => {
+      const step = h("button", {
+        class: "btn",
+        style: `text-align:left;margin-left:${i * 18}px;border-left:4px solid var(--accent);`,
+      }, [
+        h("span", { style: "font-weight:700" }, [r.name]),
+        h("span", { style: "color:var(--text-dim);font-size:.82rem;margin-left:10px" }, [r.arr]),
+      ]);
+      step.addEventListener("click", () => {
+        ladder.querySelectorAll(".btn").forEach((b) => b.classList.remove("btn-primary"));
+        step.classList.add("btn-primary");
+        detail.innerHTML = "";
+        detail.appendChild(h("div", { class: "callout-title" }, [`🚀 ${r.name}`]));
+        detail.appendChild(h("div", { style: "margin-top:4px" }, [
+          h("div", {}, [h("b", {}, ["目安ARR: "]), r.arr]),
+          h("div", {}, [h("b", {}, ["調達額の目安: "]), r.raise]),
+          h("div", { style: "margin-top:4px;color:var(--text-dim)" }, [r.todo]),
+        ]));
+      });
+      ladder.appendChild(step);
+    });
+
+    stage.appendChild(h("p", { class: "lead", style: "margin-top:0" }, ["下に行くほど初期、上に行くほど成長後のラウンドです:"]));
+    stage.appendChild(ladder);
+    stage.appendChild(detail);
+    root.appendChild(panel);
+  };
 })();
